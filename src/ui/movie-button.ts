@@ -11,6 +11,7 @@ export function addMovieButton(lampa: LampaApi, $: JQueryStatic, event: LampaEve
   const torrent = root.find('.view--torrent').first();
   if (!container.length && !torrent.length) {
     logger.error('Контейнер кнопок карточки не найден');
+    lampa.Noty.show('Lampa Stream: контейнер кнопок в карточке не найден.');
     return;
   }
   const button = $('<div class="full-start__button selector view--lampa-stream"></div>');

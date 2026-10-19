@@ -25,6 +25,9 @@ describe('bootstrap', () => {
     expect(app.count('app')).toBe(0);
     expect(document.querySelectorAll('#lampa-stream-style')).toHaveLength(1);
     expect(host.__lampaStream?.status).toBe('ready');
+    expect(lampa.Noty.show).toHaveBeenCalledExactlyOnceWith(
+      'Lampa Stream: плагин готов. Откройте карточку фильма.',
+    );
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -63,5 +66,6 @@ describe('bootstrap', () => {
     vi.advanceTimersByTime(60_000);
     expect(lampa.Component.add).not.toHaveBeenCalled();
     expect(host.__lampaStream?.status).toBe('failed');
+    expect(lampa.Noty.show).toHaveBeenCalledWith('Lampa Stream: недоступны API: Navigator.move');
   });
 });

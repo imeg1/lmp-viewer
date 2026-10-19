@@ -5,26 +5,30 @@ import { addMovieButton, COMPONENT } from '../ui/movie-button';
 import { createVideoScreen } from '../ui/video-screen';
 import { logger } from './logger';
 
-function usable(lampa: LampaApi): boolean {
-  return [
-    lampa.Listener?.follow,
-    lampa.Listener?.remove,
-    lampa.Component?.add,
-    lampa.Activity?.push,
-    lampa.Activity?.backward,
-    lampa.Activity?.active,
-    lampa.Controller?.add,
-    lampa.Controller?.toggle,
-    lampa.Controller?.collectionSet,
-    lampa.Controller?.collectionFocus,
-    lampa.Player?.play,
-    lampa.Player?.playlist,
-    lampa.Player?.listener?.follow,
-    lampa.Player?.listener?.remove,
-    lampa.PlayerVideo?.listener?.follow,
-    lampa.PlayerVideo?.listener?.remove,
-    lampa.Noty?.show,
-  ].every((method) => typeof method === 'function');
+function missingApis(host: PluginHost): string[] {
+  const lampa = host.Lampa;
+  const methods: Record<string, unknown> = {
+    jQuery: host.$,
+    'Navigator.move': host.Navigator?.move,
+    'Listener.follow': lampa?.Listener?.follow,
+    'Listener.remove': lampa?.Listener?.remove,
+    'Component.add': lampa?.Component?.add,
+    'Activity.push': lampa?.Activity?.push,
+    'Activity.backward': lampa?.Activity?.backward,
+    'Activity.active': lampa?.Activity?.active,
+    'Controller.add': lampa?.Controller?.add,
+    'Controller.toggle': lampa?.Controller?.toggle,
+    'Controller.collectionSet': lampa?.Controller?.collectionSet,
+    'Controller.collectionFocus': lampa?.Controller?.collectionFocus,
+    'Player.play': lampa?.Player?.play,
+    'Player.playlist': lampa?.Player?.playlist,
+    'Player.listener.follow': lampa?.Player?.listener?.follow,
+    'Player.listener.remove': lampa?.Player?.listener?.remove,
+    'PlayerVideo.listener.follow': lampa?.PlayerVideo?.listener?.follow,
+    'PlayerVideo.listener.remove': lampa?.PlayerVideo?.listener?.remove,
+    'Noty.show': lampa?.Noty?.show,
+  };
+  return Object.keys(methods).filter((name) => typeof methods[name] !== 'function');
 }
 
 function installStyle(): void {
@@ -55,13 +59,7 @@ export function bootstrap(host: PluginHost): void {
   const start = () => {
     if (state.status !== 'waiting') return;
     const { Lampa: lampa, $: jquery, Navigator: navigator } = host;
-    if (
-      !lampa ||
-      typeof jquery !== 'function' ||
-      typeof navigator?.move !== 'function' ||
-      !usable(lampa)
-    )
-      return;
+    if (!lampa || !jquery || !navigator || missingApis(host).length) return;
     detach();
     try {
       const registry = new SourceRegistry();
@@ -80,9 +78,11 @@ export function bootstrap(host: PluginHost): void {
       });
       state.status = 'ready';
       logger.info(`MVP 0.1.0 готов; Lampa web ${lampa.Manifest?.app_version ?? 'неизвестна'}`);
+      lampa.Noty.show('Lampa Stream: плагин готов. Откройте карточку фильма.');
     } catch (error) {
       state.status = 'failed';
       logger.error('Ошибка инициализации; перезапустите Lampa', error);
+      host.Lampa?.Noty?.show?.('Lampa Stream: ошибка инициализации.');
     }
   };
   const ready: Listener = (event) => {
@@ -102,7 +102,12 @@ export function bootstrap(host: PluginHost): void {
     if (attempts >= 120 && state.status === 'waiting') {
       detach();
       state.status = 'failed';
-      logger.error('Lampa не готова или API несовместимы после 60 секунд ожидания');
+      const missing = missingApis(host);
+      const message = missing.length
+        ? `Lampa Stream: недоступны API: ${missing.join(', ')}`
+        : 'Lampa Stream: не получен сигнал готовности Lampa.';
+      logger.error(message);
+      host.Lampa?.Noty?.show?.(message);
     }
   };
   const timer = setInterval(check, 500);
