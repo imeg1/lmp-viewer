@@ -1,7 +1,7 @@
 import type { VideoResult, VideoSource } from './types';
 
 export const DEMO_CREDIT =
-  'Big Buck Bunny © 2008 Blender Foundation · www.bigbuckbunny.org · CC BY 3.0';
+  'Big Buck Bunny © 2008 Blender Foundation · www.bigbuckbunny.org · CC BY 3.0 · демонстрационный фрагмент';
 
 export class DemoSource implements VideoSource {
   readonly id = 'demo';
@@ -11,10 +11,10 @@ export class DemoSource implements VideoSource {
     return Promise.resolve([
       {
         id: 'big-buck-bunny',
-        title: 'Демонстрация — Big Buck Bunny',
+        title: 'Демонстрация — фрагмент Big Buck Bunny',
         streams: [
           {
-            url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            url: 'https://www.w3schools.com/html/mov_bbb.mp4',
             format: 'mp4',
           },
         ],

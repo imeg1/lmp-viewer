@@ -74,13 +74,14 @@ Workflow `.github/workflows/deploy.yml` проверяет типы, lint, фо�
 Big Buck Bunny © 2008 Blender Foundation · www.bigbuckbunny.org.
 [Условия CC BY 3.0](https://peach.blender.org/about/),
 [страница загрузки](https://peach.blender.org/download/).
-Атрибуция также показана на экране плагина. Фильм не изменён.
+Атрибуция также показана на экране плагина. Используется короткий фрагмент фильма.
 
-Используется HTTPS-файл `BigBuckBunny.mp4` с Google Cloud Storage,
-также используемый в [примере AMP](https://amp.dev/documentation/examples/components/amp-video/).
-Для диагностики зависания на Samsung прежний файл `.m4v` с download.blender.org
-заменён на этот MP4. Причина зависания и результат замены на телевизоре
-пока не подтверждены.
+Используется HTTPS-файл `https://www.w3schools.com/html/mov_bbb.mp4`
+из [примера HTML Video](https://www.w3schools.com/html/html5_video.asp).
+При проверке прямого URL веб-инструмент получил тип содержимого `video/mp4`,
+но воспроизведение телевизором пока не подтверждено.
+Предыдущий адрес Google Cloud Storage возвращал `AccessDenied` по проверке
+пользователя и больше не используется.
 URL находится в `src/sources/demo-source.ts`; доступность и декодирование
 конкретным телевизором должны быть проверены вручную.
 Предварительный fetch/HEAD не используется: он может отказать по CORS при
