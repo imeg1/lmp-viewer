@@ -109,7 +109,7 @@ export function createVideoScreen(
     private showError(): void {
       if (!this.isActive()) return;
       const message =
-        'Не удалось воспроизвести тестовое видео. Проверьте интернет и повторите попытку.';
+        'Не удалось загрузить тестовое видео. Нажмите «Назад», проверьте интернет и повторите попытку.';
       this.status.text(message);
       lampa.Noty.show(message);
     }

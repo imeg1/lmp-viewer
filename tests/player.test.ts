@@ -1,10 +1,51 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LampaPlayerAdapter } from '../src/lampa/player';
 import { mockHost } from './helpers';
 
 const video = { url: 'https://example.org/demo.mp4' };
 
 describe('Lampa player adapter', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
+  it('reports a stalled load after start, retaining ownership until Back', () => {
+    const { lampa, startPlayer, closePlayer } = mockHost(false);
+    const onError = vi.fn();
+    const adapter = new LampaPlayerAdapter(lampa, onError);
+    adapter.play(video, 'Demo');
+    vi.advanceTimersByTime(60000);
+    expect(onError).not.toHaveBeenCalled();
+    startPlayer(vi.mocked(lampa.Player.play).mock.calls[0]![0]);
+    vi.advanceTimersByTime(29999);
+    expect(onError).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(onError).toHaveBeenCalledTimes(1);
+    adapter.play(video, 'Demo');
+    expect(lampa.Player.play).toHaveBeenCalledTimes(1);
+    closePlayer();
+    adapter.play(video, 'Demo');
+    expect(lampa.Player.play).toHaveBeenCalledTimes(2);
+    adapter.dispose();
+  });
+
+  it.each(['loaded', 'closed', 'replaced'])('cancels the load deadline when %s', (mode) => {
+    const { lampa, videoEvents, closePlayer } = mockHost();
+    const onError = vi.fn();
+    const adapter = new LampaPlayerAdapter(lampa, onError);
+    adapter.play(video, 'Demo');
+    if (mode === 'loaded') videoEvents.send('loadeddata');
+    if (mode === 'closed') closePlayer();
+    if (mode === 'replaced') lampa.Player.play({ ...video, title: 'Other' });
+    vi.advanceTimersByTime(60000);
+    expect(onError).not.toHaveBeenCalled();
+    adapter.dispose();
+    expect(videoEvents.count('loadeddata')).toBe(0);
+  });
   it('passes URL and title to the built-in player and replaces the playlist', () => {
     const { lampa } = mockHost();
     new LampaPlayerAdapter(lampa, vi.fn()).play(video, 'Demo');
