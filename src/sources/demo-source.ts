@@ -14,8 +14,7 @@ export class DemoSource implements VideoSource {
         title: 'Демонстрация — Big Buck Bunny',
         streams: [
           {
-            url: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_640x360.m4v',
-            quality: '360p',
+            url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             format: 'mp4',
           },
         ],

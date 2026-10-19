@@ -76,9 +76,11 @@ Big Buck Bunny © 2008 Blender Foundation · www.bigbuckbunny.org.
 [страница загрузки](https://peach.blender.org/download/).
 Атрибуция также показана на экране плагина. Фильм не изменён.
 
-Используется HTTPS-файл Blender Foundation `BigBuckBunny_640x360.m4v`:
-контейнер MPEG-4, в контракте источника `format: 'mp4'`.
-Расширение `.m4v` не означает использование отдельного плеера.
+Используется HTTPS-файл `BigBuckBunny.mp4` с Google Cloud Storage,
+также используемый в [примере AMP](https://amp.dev/documentation/examples/components/amp-video/).
+Для диагностики зависания на Samsung прежний файл `.m4v` с download.blender.org
+заменён на этот MP4. Причина зависания и результат замены на телевизоре
+пока не подтверждены.
 URL находится в `src/sources/demo-source.ts`; доступность и декодирование
 конкретным телевизором должны быть проверены вручную.
 Предварительный fetch/HEAD не используется: он может отказать по CORS при
