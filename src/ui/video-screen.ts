@@ -33,6 +33,18 @@ export function createVideoScreen(
       '▶ Воспроизвести тестовое видео',
     );
     private readonly status = $('<p role="status" aria-live="polite"></p>');
+    private readonly errorBanner = $('<div role="alert"></div>').css({
+      position: 'fixed',
+      bottom: '8%',
+      left: '8%',
+      right: '8%',
+      padding: '1.2em',
+      background: '#8b1515',
+      color: '#fff',
+      fontSize: '24px',
+      zIndex: 2147483647,
+      pointerEvents: 'none',
+    });
     private readonly movie: Movie;
     private readonly player: LampaPlayerAdapter;
     private searching = false;
@@ -65,6 +77,7 @@ export function createVideoScreen(
         toggle: () => {
           if (!this.isActive()) return;
           // Returning from a cancelled launch must permit another OK.
+          this.errorBanner.detach();
           this.player.cancelOpening();
           lampa.Controller.collectionSet(this.root);
           lampa.Controller.collectionFocus(this.button[0] || false, this.root);
@@ -85,6 +98,7 @@ export function createVideoScreen(
       if (!this.isActive() || this.searching || this.player.state !== 'idle') return;
       const request = ++this.requestId;
       this.searching = true;
+      this.errorBanner.detach();
       this.status.text('Подготовка тестового видео…');
       try {
         const results = await source.search(this.movie);
@@ -111,6 +125,7 @@ export function createVideoScreen(
       const message =
         'Не удалось загрузить тестовое видео. Нажмите «Назад», проверьте интернет и повторите попытку.';
       this.status.text(message);
+      this.errorBanner.text(message).appendTo(document.body);
       lampa.Noty.show(message);
     }
 
@@ -119,6 +134,7 @@ export function createVideoScreen(
     }
 
     pause(): void {
+      this.errorBanner.detach();
       this.active = false;
       this.requestId++;
       if (this.searching)
@@ -135,6 +151,7 @@ export function createVideoScreen(
       this.pause();
       this.player.dispose();
       this.button.off('.lampaStream');
+      this.errorBanner.remove();
       this.root.remove();
     }
   };

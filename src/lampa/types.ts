@@ -2,6 +2,7 @@
 export interface LampaEvent {
   type?: string;
   fatal?: boolean;
+  current?: number;
   url?: string;
   title?: string;
   data?: { movie?: Record<string, unknown>; url?: string; title?: string };

@@ -59,6 +59,30 @@ describe('movie button', () => {
 });
 
 describe('video screen', () => {
+  it('shows a stalled-load alert above the player and removes it on Back', async () => {
+    vi.useFakeTimers();
+    const { screen, controllers } = screenWith({
+      id: 'demo',
+      name: 'Demo',
+      search: vi.fn().mockResolvedValue(result),
+    });
+    try {
+      screen.render().find('.selector').trigger('hover:enter');
+      await flush();
+      vi.advanceTimersByTime(30000);
+      expect(document.querySelector('[role="alert"]')?.textContent).toContain(
+        'Не удалось загрузить',
+      );
+      controllers.player?.back?.();
+      expect(document.querySelector('[role="alert"]')).toBeNull();
+      expect(screen.render().find('[role="status"]').text()).toContain('Не удалось загрузить');
+    } finally {
+      screen.destroy();
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
   it('escapes movie titles, marks demo mode, supports arrows and Back', () => {
     const { screen, controllers, host, lampa } = screenWith({
       id: 'demo',

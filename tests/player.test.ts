@@ -38,14 +38,41 @@ describe('Lampa player adapter', () => {
     const onError = vi.fn();
     const adapter = new LampaPlayerAdapter(lampa, onError);
     adapter.play(video, 'Demo');
-    if (mode === 'loaded') videoEvents.send('loadeddata');
+    if (mode === 'loaded') videoEvents.send('timeupdate', { current: 1 });
     if (mode === 'closed') closePlayer();
     if (mode === 'replaced') lampa.Player.play({ ...video, title: 'Other' });
     vi.advanceTimersByTime(60000);
     expect(onError).not.toHaveBeenCalled();
     adapter.dispose();
-    expect(videoEvents.count('loadeddata')).toBe(0);
+    expect(videoEvents.count('timeupdate')).toBe(0);
   });
+
+  it('reports an opening that never starts, and cancels its deadline on Back', () => {
+    const { lampa, closePlayer } = mockHost(false);
+    const onError = vi.fn();
+    const adapter = new LampaPlayerAdapter(lampa, onError);
+    adapter.play(video, 'Demo');
+    vi.advanceTimersByTime(90000);
+    expect(onError).toHaveBeenCalledTimes(1);
+    closePlayer();
+    adapter.play(video, 'Demo');
+    closePlayer();
+    vi.advanceTimersByTime(90000);
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not mistake loadeddata or zero playback time for playback progress', () => {
+    const { lampa, videoEvents } = mockHost();
+    const onError = vi.fn();
+    const adapter = new LampaPlayerAdapter(lampa, onError);
+    adapter.play(video, 'Demo');
+    videoEvents.send('loadeddata');
+    videoEvents.send('timeupdate', { current: 0 });
+    vi.advanceTimersByTime(30000);
+    expect(onError).toHaveBeenCalledTimes(1);
+    adapter.dispose();
+  });
+
   it('passes URL and title to the built-in player and replaces the playlist', () => {
     const { lampa } = mockHost();
     new LampaPlayerAdapter(lampa, vi.fn()).play(video, 'Demo');
